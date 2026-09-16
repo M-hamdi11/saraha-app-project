@@ -1,0 +1,19 @@
+{
+  "name": "saraha-app",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "mahmoud hamdi",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --watch src/app.js"
+  },
+  "dependencies": {
+    "argon2": "^0.45.1",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.10.0"
+  }
+}
