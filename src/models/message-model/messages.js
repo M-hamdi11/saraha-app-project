@@ -11,14 +11,8 @@ const messageschema = new mongoose.Schema({
     receiverId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        refPath: "receiverModel",
 
     },
-    receiverModel: {
-        type: String,
-        required: true,
-        enum: ["User", "Admin"],
-    }
 },
  {
     timestamps: true,
@@ -26,4 +20,6 @@ const messageschema = new mongoose.Schema({
 
 )
 
-export default mongoose.model('message',messageschema)
+const MessageModel = mongoose.model('message', messageschema)
+
+export default MessageModel

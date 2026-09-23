@@ -1,4 +1,4 @@
-import {deleteUserservice, getUserprofileservice, loginUserservice, registerUserservice, updateUserservice } from "./userservice.js"
+import {deleteUserservice, getAllUserService, getUserprofileservice, loginUserservice, registerUserservice, updateUserservice } from "./userservice.js"
 
 export async function registerUsercontroller(req,res,next){
     try{
@@ -49,4 +49,13 @@ export async function getUserprofilecontroller(req,res,next){
     }catch(err){
         next(err)
     }
+}
+export async function getAllUsercontroller(req,res,next){
+try{
+    const allusers=await getAllUserService()
+    res.status(200).json({users:allusers})
+}catch(err){
+    next(err)
+}
+
 }
