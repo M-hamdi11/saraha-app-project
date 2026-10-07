@@ -11,7 +11,7 @@ export async function sendmessagecontroller(req,res,next){
 }
 export async function getusermessagescontroller(req,res,next){
     try{
-        const messages=await getusermessageservice(req.params.id)
+        const messages=await getusermessageservice(req.user.id)
         res.status(200).json({all_messages:messages})
 
     }catch(err){
