@@ -1,3 +1,4 @@
 .env
+.env.*
+.envtest.env
 node_modules/
-.envtest
