@@ -1,17 +1,23 @@
 import { Router } from "express";
-import { deleteUsercontroller, getAllUsercontroller, getUserprofilecontroller, loginUsercontroller, registerUsercontroller, updateUsercontroller } from "./usercontroller.js";
+import { deleteUserprofilecontroller, getUserprofilecontroller, loginUsercontroller, registerUsercontroller, updateuserpasswordcontroller, updateUserprofilecontroller } from "./usercontroller.js";
+import { verify_token_middleware } from "../../utils/verifytokenmeddleware/verifytoken.js";
+
+import { authmiddleware } from "../../utils/authenticationMiddleware/authenticationmiddleware.js";
+import { loginschema } from "../../utils/authenticationMiddleware/loginauth.js";
+import { registerSchema } from "../../utils/authenticationMiddleware/registerauth.js";
+import { updateProfileSchema } from "../../utils/authenticationMiddleware/updateprofileauth.js";
 const userrouter=Router();
 
-userrouter.post('/register',registerUsercontroller)
+userrouter.post('/register',authmiddleware(registerSchema),registerUsercontroller)
 
-userrouter.post('/login',loginUsercontroller)
+userrouter.post('/login',authmiddleware(loginschema),loginUsercontroller)
 
-userrouter.patch('/update-user/:id',updateUsercontroller)
+userrouter.patch('/update-profile',authmiddleware(updateProfileSchema),verify_token_middleware,updateUserprofilecontroller)
 
-userrouter.delete('/delete-user/:id',deleteUsercontroller)
+userrouter.get('/profile',verify_token_middleware,getUserprofilecontroller)
 
-userrouter.get('/profile/:id',getUserprofilecontroller)
+userrouter.patch('/update-password',verify_token_middleware,updateuserpasswordcontroller)
 
-userrouter.get('/',getAllUsercontroller)
+userrouter.delete('/delete-profile',verify_token_middleware,deleteUserprofilecontroller)
 
 export default userrouter;

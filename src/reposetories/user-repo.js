@@ -23,6 +23,7 @@ export default class User_Repo extends base_repo {
             lastName: 1,
             email: 1,
             phone: 1,
+            role:1
         })
     }
 }

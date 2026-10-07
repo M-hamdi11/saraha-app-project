@@ -10,7 +10,7 @@
     return this.model.create(body)
   }
   updatedocument(filter,body){
-    return this.model.updateOne(filter,body)
+    return this.model.updateOne(filter,body,{ new: true })
   }
   finddocbyid(id){
    return this.model.findById(id)

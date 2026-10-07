@@ -20,7 +20,7 @@ const UserSchama = new mongoose.Schema({
         required: true,
     },
     phone: {
-        required:true,
+        required: true,
         type: String,
         trim: true,
     },
@@ -36,6 +36,17 @@ const UserSchama = new mongoose.Schema({
             default: 'male',
             message: 'gender must be male or female'
         }
+    },
+    role: {
+        type: String,
+        enum: {
+            values: ['user', 'admin'],
+            default: 'user',
+        }
+    },
+    passwordChangedAt: {
+        type: Date,
+        default: null
     }
 },
     {
@@ -47,14 +58,14 @@ const UserSchama = new mongoose.Schema({
                 }
             }
         },
-        toJSON:{virtuals:true},
-        toObject:{virtuals:true}
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }
     }
 )
-UserSchama.methods.getfullname=function(){
-   return `${this.firstName} ${this.lastName}`;
+UserSchama.methods.getfullname = function () {
+    return `${this.firstName} ${this.lastName}`;
 }
-export const UserModel= mongoose.model('User',UserSchama)
+export const UserModel = mongoose.model('User', UserSchama)
 
 
 
