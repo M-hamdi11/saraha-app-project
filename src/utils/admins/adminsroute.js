@@ -4,7 +4,7 @@ import { check_admin } from "../checkAdminMiddleware/check_admin.js";
 import { CreateAdmincontroller, deleteUseradmincontroller, updateUseradmincontroller } from "./adminscontroller.js";
 import { getAllUsercontroller} from "../../modules/users/usercontroller.js";
 import {updateProfileSchemaAdmin } from "../authenticationMiddleware/updateprofileauth.js";
-import { authmiddleware } from "../authenticationMiddleware/authenticationmiddleware.js";
+import { authmiddleware } from "../authenticationMiddleware/validationmiddleware.js";
 import { registerSchema } from "../authenticationMiddleware/registerauth.js";
 const adminrouter=Router();
  adminrouter.post('/create-admin',authmiddleware(registerSchema),verify_token_middleware,check_admin,CreateAdmincontroller)

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 const UserSchama = new mongoose.Schema({
     firstName: {
         type: String,
@@ -31,22 +32,27 @@ const UserSchama = new mongoose.Schema({
     },
     gender: {
         type: String,
-        enum: {
-            values: ['male', 'female'],
-            default: 'male',
-            message: 'gender must be male or female'
-        }
+        enum: ['male', 'female'],
+        default: 'male',
     },
     role: {
         type: String,
-        enum: {
-            values: ['user', 'admin'],
-            default: 'user',
-        }
+        enum: ['user', 'admin'],
+        default: 'user',
     },
     passwordChangedAt: {
         type: Date,
         default: null
+    },
+    googleSub: {
+        type: String,
+        index: { unique: true, sparse: true, name: 'sup_unique_index' }
+    },
+    picture: { type: String },
+    provider: { type: String, enum: ['local', 'google'], default: 'local' },
+    is_email_verified:{
+        type:String,
+        default:false
     }
 },
     {
