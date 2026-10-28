@@ -6,7 +6,7 @@ import { error_handler } from "../../errorHandling/errorclass.js";
 import jwt from 'jsonwebtoken'
 import { generaterefreshtoken, generatetoken } from "../../utils/createToken/generatetoken.js";
 import { getSecretByRole } from "../../utils/createToken/getsecret.js";
-import { add_tokens_id_blacklist, redisdeleteitem, redisgetitem, redissetitem } from "../../reposetories/redisrepo.js";
+import { add_tokens_id_blacklist, redisdeleteitem, redisgetitem, redisitemexists, redissetitem } from "../../reposetories/redisrepo.js";
 import { create_otp } from "../../utils/create-otp/otp.js";
 import { email_event } from "../../utils/events/sendmailevent.js";
 import crypto from "crypto";
@@ -41,19 +41,58 @@ export async function loginUserservice(body) {
     if (!finduser) {
         throw new error_handler('invalid email or password')
     }
-
+    const failedAttemptsKey = `login-failures:${email}`
+    const failedAttempts = Number(await redisgetitem(failedAttemptsKey)) || 0
     const comparepass = await comparepasswords(password, finduser.password)
-    if (!comparepass) {
-        throw new error_handler('invalid email or password')
+
+    if (failedAttempts >= 5) {
+        throw new error_handler("your login banned for 5 minutes")
     }
 
-    finduser.phone = decryption(finduser.phone)
+    if (!comparepass) {
+        const nextFailedAttempts = failedAttempts + 1
+        await redissetitem(failedAttemptsKey, String(nextFailedAttempts), 5 * 60)
+        if (nextFailedAttempts >= 5) {
+            throw new error_handler("your login banned for 5 minutes")
+        }
+        throw new error_handler('invalid email or password')
 
-    const token = generatetoken(finduser)
-    const refreshtoken = generaterefreshtoken(finduser)
+    }
 
+    await redisdeleteitem(failedAttemptsKey)
 
-    return { user: finduser, token, refreshtoken }
+    if (finduser.two_step_verification !== true) {
+        finduser.phone = decryption(finduser.phone)
+
+        const token = generatetoken(finduser)
+        const refreshtoken = generaterefreshtoken(finduser)
+
+        return { message:'user looged in succsessfully', token, refreshtoken }
+    }
+    const otp = create_otp()
+    await redissetitem(`login-otp:${finduser.email}`, otp, 5 * 60)
+
+    await redissetitem(`login-email`,finduser.email)
+
+    email_event.emit('send-otp-email', { email: finduser.email, otp })
+    return { message: 'the code has been sent, check your email' }
+}
+
+export async function confirmloginservice(email,otp) {
+ const saved_otp=await redisgetitem(`login-otp:${email}`)
+ if(!saved_otp){
+    throw new error_handler('resend your otp')
+ }
+  if (String(otp) !== saved_otp) throw new error_handler('invalid otp')
+  const user=await user_repo.finduserbyemail(email)
+if(!user){
+    throw new error_handler('user not found')
+}
+ user.phone = decryption(user.phone)
+const token= generatetoken(user)
+const refresh_token=generaterefreshtoken(user)
+return {token:token,refresh_token:refresh_token}
+    
 }
 
 export const updateUserservice = async (body, id) => {
@@ -176,7 +215,7 @@ export async function resendOtpservice(email) {
     const genericMsg = { message: "if the email is registered and not verified, an otp has been sent" }
 
     const user = await user_repo.finduserbyemail(email)
-    if (!user || user.isVerified) return genericMsg
+   if (!user || user.is_email_verified) return genericMsg
 
     const saved_otp = await redisgetitem(`verify-otp:${email}`)
     if (saved_otp) return genericMsg
@@ -228,4 +267,43 @@ export async function resetpasswordservice(resetToken, newpassword) {
     await redisdeleteitem(`reset-token:${resetToken}`)
     return { message: "password changed successfully" }
 
+}
+export async function changeprofilephotoservice(userId, file) {
+    const userexist = await user_repo.finddocbyid(userId)
+    if (!userexist) {
+        throw new error_handler("user not found")
+    }
+    await user_repo.updatedocument({ _id: userexist._id }, { picture: file })
+    return { message: "user profile picture changed succssefully" }
+
+}
+
+export async function two_step_verifications_service(userId) {
+    const user = await user_repo.finddocbyid(userId)
+    if (!user) throw new error_handler('user not found')
+    if (user.two_step_verification === true) {
+        throw new error_handler('2-step verification already enabled')
+    }
+
+    const otp = create_otp()
+    await redissetitem(`2_step_verify:${user.email}`, otp, 5 * 60)
+    email_event.emit('send-otp-email', { email: user.email, otp })
+
+    return { message: 'the code has been sent, check your email' }
+}
+
+export async function compareotpservice(userId, otp) {
+    const user = await user_repo.finddocbyid(userId)
+    if (!user) throw new error_handler('user not found')
+
+    const key = `2_step_verify:${user.email}`
+    const saved_otp = await redisgetitem(key)
+    if (!saved_otp) throw new error_handler('resend your otp')
+    if (String(otp) !== saved_otp) throw new error_handler('invalid otp')
+
+    user.two_step_verification = true
+    await user.save()
+    await redisdeleteitem(key)
+
+    return { message: 'two-step-verification completed' }
 }

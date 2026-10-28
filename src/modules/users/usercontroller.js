@@ -1,4 +1,5 @@
-import {deleteUserservice, forgotpasswordservice, getAllUserService, getUserprofileservice, log_out_service, loginUserservice, refreshtokenservice, registerUserservice, resendOtpservice, resetpasswordservice, updateuserpasswordservice, updateUserservice, verifyemailservice, verifyForgetPassOtpService } from "./userservice.js"
+
+import {changeprofilephotoservice, compareotpservice, confirmloginservice, deleteUserservice, forgotpasswordservice, getAllUserService, getUserprofileservice, log_out_service, loginUserservice, refreshtokenservice, registerUserservice, resendOtpservice, resetpasswordservice, two_step_verifications_service, updateuserpasswordservice, updateUserservice, verifyemailservice, verifyForgetPassOtpService } from "./userservice.js"
 
 export async function registerUsercontroller(req,res,next){
     try{
@@ -13,8 +14,7 @@ export async function loginUsercontroller(req,res,next){
     try{
      
        const addUser=await loginUserservice(req.body)
-       
-    res.status(200).json({ message: 'user login succesfully' , token:addUser.token,refreshtoken:addUser.refreshtoken})
+    res.status(200).json({ message: addUser.message, token:addUser.token,refreshtoken:addUser.refreshtoken})
 
 
     }catch(err){
@@ -22,6 +22,14 @@ export async function loginUsercontroller(req,res,next){
     }
 }
 
+export async function confirmlogincontroller(req,res,next){
+    try{
+       const tokensreply=await confirmloginservice(req.body.email,req.body.otp)
+        res.status(200).json(tokensreply)
+    }catch(err){
+        next(err)
+    }
+}
 
 export async function updateUserprofilecontroller(req,res,next){
 try{
@@ -141,6 +149,43 @@ export async function resetpasswordcontroller(req,res,next){
     try{
         const resetpassresponse=await resetpasswordservice(req.body.resetToken,req.body.newpassword)
         res.status(200).json(resetpassresponse)
+    }catch(err){
+        next(err)
+    }
+}
+
+export async function changeprofilephotocontroller(req,res,next){
+     try {
+        console.log(req.file)
+    if (!req.file) {
+      return res.status(400).json({ message: "no file uploaded" });
+    }
+    const pictureresponse = await changeprofilephotoservice(
+      req.user._id,
+      req.file.filename   
+    );
+    res.status(200).json(pictureresponse);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function two_step_verifications_controller(req,res,next){
+    try{
+         
+        const otpreply=await two_step_verifications_service(req.user._id)
+        res.status(200).json(otpreply)
+
+    }catch(err){
+        next(err)
+    }
+}
+
+export async function compareotpcontroller(req,res,next){
+    try{
+        const twostep_reply=await compareotpservice(req.user._id,req.body.otp)
+        res.status(200).json(twostep_reply)  
+
     }catch(err){
         next(err)
     }

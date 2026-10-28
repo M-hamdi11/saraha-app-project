@@ -48,12 +48,21 @@ const UserSchama = new mongoose.Schema({
         type: String,
         index: { unique: true, sparse: true, name: 'sup_unique_index' }
     },
-    picture: { type: String },
+    picture: {
+        type: String,
+        default: "default-avatar.png"
+    },
+
     provider: { type: String, enum: ['local', 'google'], default: 'local' },
-    is_email_verified:{
-        type:String,
-        default:false
-    }
+    is_email_verified: {
+        type: Boolean,
+        default: false
+    },
+    two_step_verification: {
+        type: Boolean,
+        default: false
+    },
+
 },
     {
         timestamps: true,
