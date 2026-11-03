@@ -23,6 +23,14 @@ app.use('/uploads', express.static(path.resolve('uploads'),{
      index: false,     
     dotfiles: 'deny'
 }))
+app.get('/',async function (req,res,next) {
+    try{
+     res.status(200).json("hellooooooo testttttt")
+    }catch(err){
+        next(err)
+    }
+    
+})
 
 app.use('/users',userrouter)
 
