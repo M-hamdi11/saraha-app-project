@@ -1,4 +1,5 @@
 .env
 .env.*
 .envtest.env
+uploads
 node_modules/

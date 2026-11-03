@@ -6,7 +6,7 @@ import { error_handler } from "../../errorHandling/errorclass.js";
 import jwt from 'jsonwebtoken'
 import { generaterefreshtoken, generatetoken } from "../../utils/createToken/generatetoken.js";
 import { getSecretByRole } from "../../utils/createToken/getsecret.js";
-import { add_tokens_id_blacklist, redisdeleteitem, redisgetitem, redisitemexists, redissetitem } from "../../reposetories/redisrepo.js";
+import { add_tokens_id_blacklist, redisdeleteitem, redisgetitem,redissetitem } from "../../reposetories/redisrepo.js";
 import { create_otp } from "../../utils/create-otp/otp.js";
 import { email_event } from "../../utils/events/sendmailevent.js";
 import crypto from "crypto";
